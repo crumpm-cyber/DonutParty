@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Portal | The Donut Party</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .staff-login-box {
+      max-width: 420px;
+      margin: 4rem auto;
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid var(--chocolate);
+      text-align: center;
+    }
+    .staff-login-box h2 { margin-bottom: 0.5rem; }
+    .staff-login-box .subtitle {
+      color: #666;
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
+    }
+    .staff-login-box input[type="password"] {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 1.05rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      outline: none;
+    }
+    .staff-login-box input[type="password"]:focus { border-color: var(--chocolate); }
+    .staff-login-box .error {
+      color: #c62828;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .staff-header {
+      background: #1a1a1a;
+      color: white;
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+    .staff-header .status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: #4caf50;
+      border-radius: 50%;
+    }
+    .dashboard {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.3rem;
+      margin-bottom: 2.2rem;
+    }
+    .metric-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.3rem 1.2rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      border-left: 5px solid var(--chocolate);
+    }
+    .metric-card .label {
+      font-size: 0.82rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 0.25rem;
+    }
+    .metric-card .value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--chocolate);
+    }
+    .metric-card .sub {
+      font-size: 0.82rem;
+      color: #888;
+      margin-top: 0.15rem;
+    }
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+    }
+    .panel h3 {
+      font-size: 1.12rem;
+      color: var(--chocolate);
+      margin-bottom: 1rem;
+    }
+    .panel label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+      color: #444;
+    }
+    .panel input[type="text"],
+    .panel input[type="number"],
+    .panel input[type="date"],
+    .panel textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.97rem;
+      margin-bottom: 0.9rem;
+      font-family: inherit;
+    }
+    .panel textarea {
+      min-height: 85px;
+      resize: vertical;
+    }
+    .panel input:focus,
+    .panel textarea:focus {
+      outline: none;
+      border-color: var(--chocolate);
+    }
+    .btn-row {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    .btn {
+      padding: 0.55rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary { background: var(--chocolate); color: white; }
+    .btn-primary:hover { background: #3d2210; }
+    .btn-secondary { background: #eee; color: #333; }
+    .btn-secondary:hover { background: #ddd; }
+    .btn-danger { background: #c62828; color: white; }
+    .btn-danger:hover { background: #a01e1e; }
+    .save-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2e7d32;
+      color: white;
+      padding: 0.75rem 1.3rem;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 999;
+    }
+    .save-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 750px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .hidden { display: none !important; }
+    .note {
+      font-size: 0.83rem;
+      color: #888;
+      margin-top: -0.4rem;
+      margin-bottom: 0.9rem;
+    }
+
+    /* State results table */
+    .state-table-wrap {
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    .state-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .state-table th {
+      background: #f7f3ef;
+      position: sticky;
+      top: 0;
+      padding: 0.55rem 0.6rem;
+      text-align: left;
+      font-weight: 700;
+      color: var(--chocolate);
+      border-bottom: 2px solid #e0d5c8;
+    }
+    .state-table td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid #f0ebe5;
+    }
+    .state-table tr:hover td {
+      background: #fff9f5;
+    }
+    .state-table input[type="number"] {
+      width: 70px;
+      padding: 0.3rem 0.4rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .state-table .ev {
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    /* Applications */
+    .app-card {
+      border: 1px solid #e8e0d8;
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      margin-bottom: 0.9rem;
+      background: #fffcfa;
+    }
+    .app-card.approved {
+      border-color: #a5d6a7;
+      background: #f1f8f1;
+    }
+    .app-card.rejected {
+      border-color: #ef9a9a;
+      background: #fef5f5;
+      opacity: 0.85;
+    }
+    .app-card .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .app-card .app-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--chocolate);
+    }
+    .app-status {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .app-status.pending { background: #fff3e0; color: #e65100; }
+    .app-status.approved { background: #e8f5e9; color: #2e7d32; }
+    .app-status.rejected { background: #ffebee; color: #c62828; }
+    .app-meta {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.5;
+    }
+    .app-meta strong { color: #333; }
+    .app-actions {
+      margin-top: 0.7rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .app-empty {
+      text-align: center;
+      color: #999;
+      padding: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      border: 1.5px solid #ddd;
+      background: white;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #555;
+    }
+    .filter-tab.active {
+      background: var(--chocolate);
+      color: white;
+      border-color: var(--chocolate);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen">
+    <header>
+      <div class="nav-container">
+        <a href="index.html" class="logo"><span>🍩</span> The Donut Party</a>
+        <nav>
+          <a href="index.html">← Back to Public Site</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="staff-login-box">
+      <h2>Staff Portal</h2>
+      <p class="subtitle">Restricted access — authorized campaign staff only</p>
+      <div class="error" id="loginError">Incorrect password. Try again.</div>
+      <input type="password" id="passwordInput" placeholder="Enter staff password" autocomplete="off">
+      <button class="cta-btn" style="width:100%;" onclick="attemptLogin()">Log In</button>
+      <p style="margin-top:1.5rem; font-size:0.8rem; color:#999;">
+        Campaign operations system • Changes are saved in this browser
+      </p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <div class="staff-header">
+      <div><strong>🍩 Donut Party</strong> — Staff Portal</div>
+      <div class="status">
+        <div class="status-dot"></div>
+        <span>Logged in as Staff</span>
+        <button class="btn btn-secondary" style="margin-left:1rem; padding:0.35rem 0.9rem; font-size:0.85rem;" onclick="logout()">Log Out</button>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <h2 style="text-align:left; margin-bottom:0.25rem;">Campaign Dashboard</h2>
+      <p style="color:#666; margin-bottom:1.6rem;">Election 2026 • All fields are editable and save in this browser</p>
+
+      <!-- Metrics -->
+      <div class="dash-grid">
+        <div class="metric-card">
+          <div class="label">Projected Popular Vote</div>
+          <div class="value" id="metricVote">0%</div>
+          <div class="sub">Thomas / Matthew ticket</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Electoral Votes</div>
+          <div class="value" id="metricEV">0</div>
+          <div class="sub">Need 270 to win</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Volunteers Signed Up</div>
+          <div class="value" id="metricVols">0</div>
+          <div class="sub">Nationwide</div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Days Until Election</div>
+          <div class="value" id="metricDays">0</div>
+          <div class="sub" id="metricDateLabel">Set election date below</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT -->
+        <div>
+          <div class="panel">
+            <h3>Candidate Information</h3>
+            <label>Presidential Candidate</label>
+            <input type="text" id="candPresident" value="Thomas">
+            <label>Running Mate</label>
+            <input type="text" id="candVP" value="Matthew">
+            <label>Party Chairman</label>
+            <input type="text" id="candChair" value="Rhett">
+            <label>Campaign Slogan</label>
+            <input type="text" id="candSlogan" value="Round. Filled with freedom. Always rising.">
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="saveCandidates()">Save Candidate Info</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>National Numbers</h3>
+            <label>Donut Party (Thomas) — National %</label>
+            <input type="number" id="pollDonut" value="0" step="0.1" min="0" max="100">
+            <label>Rice Party — National %</label>
+            <input type="number" id="pollRice" value="0" step="0.1" min="0" max="100">
+            <label>Undecided / Other %</label>
+            <input type="number" id="pollOther" value="0" step="0.1" min="0" max="100">
+            <label>Electoral Votes (Donut Party)</label>
+            <input type="number" id="pollEV" value="0" min="0" max="538">
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="savePolling()">Update National Numbers</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Election Countdown</h3>
+            <p class="note">Set the election date. The dashboard will count down the days remaining.</p>
+            <label>Election Date</label>
+            <input type="date" id="electionDate" value="2026-11-03">
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="saveCountdown()">Update Countdown</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="panel">
+            <h3>Internal Staff Notes</h3>
+            <p class="note">Private notes for strategy, talking points, and reminders.</p>
+            <textarea id="staffNotes" placeholder="Add strategy notes, debate prep, state targets, etc."></textarea>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Message of the Day</h3>
+            <p class="note">Daily talking point or social post.</p>
+            <textarea id="dailyMessage" placeholder="Write today's message..."></textarea>
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="saveMessage()">Save Message</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Volunteer Tracker</h3>
+            <label>Total Volunteers</label>
+            <input type="number" id="volCount" value="0" min="0">
+            <label>New Sign-ups Today</label>
+            <input type="number" id="volToday" value="0" min="0">
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="saveVolunteers()">Update Volunteers</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATE RESULTS -->
+      <div class="panel">
+        <h3>State Results</h3>
+        <p class="note">All states start at 0. Enter projected or reported electoral votes for the Donut Party in each state. Total updates automatically.</p>
+        <div class="btn-row" style="margin-bottom:1rem;">
+          <button class="btn btn-primary" onclick="saveStates()">Save All State Results</button>
+          <button class="btn btn-secondary" onclick="zeroAllStates()">Set All States to 0</button>
+        </div>
+        <div class="state-table-wrap">
+          <table class="state-table">
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>EVs</th>
+                <th>Donut Party EVs</th>
+              </tr>
+            </thead>
+            <tbody id="stateTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Staff Applications -->
+      <div class="panel">
+        <h3>Staff Applications <span id="appCountBadge" style="font-size:0.85rem; font-weight:600; color:#888;"></span></h3>
+        <p class="note">Review applications submitted from the public Apply page. Approve or reject each one.</p>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="pending" onclick="filterApps('pending', this)">Pending</button>
+          <button class="filter-tab" data-filter="approved" onclick="filterApps('approved', this)">Approved</button>
+          <button class="filter-tab" data-filter="rejected" onclick="filterApps('rejected', this)">Rejected</button>
+          <button class="filter-tab" data-filter="all" onclick="filterApps('all', this)">All</button>
+        </div>
+        <div id="applicationsList">
+          <div class="app-empty">No applications yet.</div>
+        </div>
+      </div>
+
+      <!-- Reset -->
+      <div class="panel" style="border: 1px solid #ffcdd2;">
+        <h3 style="color:#c62828;">Reset Data</h3>
+        <p class="note">Clears all saved edits and restores blank starting values.</p>
+        <button class="btn btn-danger" onclick="resetAll()">Reset All Staff Data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-toast" id="toast">Saved successfully</div>
+
+  <script>
+    const STAFF_PASSWORD = "glaze2026";
+
+    // 50 states + DC with electoral votes (2024/2028 allocation style)
+    const STATES = [
+      { name: "Alabama", ev: 9 },
+      { name: "Alaska", ev: 3 },
+      { name: "Arizona", ev: 11 },
+      { name: "Arkansas", ev: 6 },
+      { name: "California", ev: 54 },
+      { name: "Colorado", ev: 10 },
+      { name: "Connecticut", ev: 7 },
+      { name: "Delaware", ev: 3 },
+      { name: "District of Columbia", ev: 3 },
+      { name: "Florida", ev: 30 },
+      { name: "Georgia", ev: 16 },
+      { name: "Hawaii", ev: 4 },
+      { name: "Idaho", ev: 4 },
+      { name: "Illinois", ev: 19 },
+      { name: "Indiana", ev: 11 },
+      { name: "Iowa", ev: 6 },
+      { name: "Kansas", ev: 6 },
+      { name: "Kentucky", ev: 8 },
+      { name: "Louisiana", ev: 8 },
+      { name: "Maine", ev: 4 },
+      { name: "Maryland", ev: 10 },
+      { name: "Massachusetts", ev: 11 },
+      { name: "Michigan", ev: 15 },
+      { name: "Minnesota", ev: 10 },
+      { name: "Mississippi", ev: 6 },
+      { name: "Missouri", ev: 10 },
+      { name: "Montana", ev: 4 },
+      { name: "Nebraska", ev: 5 },
+      { name: "Nevada", ev: 6 },
+      { name: "New Hampshire", ev: 4 },
+      { name: "New Jersey", ev: 14 },
+      { name: "New Mexico", ev: 5 },
+      { name: "New York", ev: 28 },
+      { name: "North Carolina", ev: 16 },
+      { name: "North Dakota", ev: 3 },
+      { name: "Ohio", ev: 17 },
+      { name: "Oklahoma", ev: 7 },
+      { name: "Oregon", ev: 8 },
+      { name: "Pennsylvania", ev: 19 },
+      { name: "Rhode Island", ev: 4 },
+      { name: "South Carolina", ev: 9 },
+      { name: "South Dakota", ev: 3 },
+      { name: "Tennessee", ev: 11 },
+      { name: "Texas", ev: 40 },
+      { name: "Utah", ev: 6 },
+      { name: "Vermont", ev: 3 },
+      { name: "Virginia", ev: 13 },
+      { name: "Washington", ev: 12 },
+      { name: "West Virginia", ev: 4 },
+      { name: "Wisconsin", ev: 10 },
+      { name: "Wyoming", ev: 3 }
+    ];
+
+    // ========== LOGIN ==========
+    function attemptLogin() {
+      const input = document.getElementById('passwordInput').value;
+      const error = document.getElementById('loginError');
+      if (input === STAFF_PASSWORD) {
+        sessionStorage.setItem('donutStaffAuth', 'true');
+        showDashboard();
+      } else {
+        error.style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('passwordInput').focus();
+      }
+    }
+
+    document.getElementById('passwordInput')?.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    function logout() {
+      sessionStorage.removeItem('donutStaffAuth');
+      location.reload();
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      buildStateTable();
+      loadAllData();
+      updateCountdown();
+      renderApplications('pending');
+    }
+
+    if (sessionStorage.getItem('donutStaffAuth') === 'true') {
+      showDashboard();
+    }
+
+    // ========== HELPERS ==========
+    function showToast(msg = 'Saved successfully') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function save(key, value) {
+      localStorage.setItem('donut_' + key, value);
+    }
+
+    function load(key, fallback) {
+      const v = localStorage.getItem('donut_' + key);
+      return v !== null ? v : fallback;
+    }
+
+    // ========== STATE TABLE ==========
+    function buildStateTable() {
+      const tbody = document.getElementById('stateTableBody');
+      tbody.innerHTML = '';
+      STATES.forEach((s, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td class="ev">${s.ev}</td>
+          <td><input type="number" id="state_${i}" min="0" max="${s.ev}" value="0" onchange="recalcStateTotal()"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function getStateValues() {
+      return STATES.map((_, i) => {
+        const el = document.getElementById('state_' + i);
+        return el ? Number(el.value) || 0 : 0;
+      });
+    }
+
+    function setStateValues(arr) {
+      STATES.forEach((_, i) => {
+        const el = document.getElementById('state_' + i);
+        if (el) el.value = arr[i] ?? 0;
+      });
+    }
+
+    function recalcStateTotal() {
+      const total = getStateValues().reduce((a, b) => a + b, 0);
+      // Optionally live-update the EV metric if user wants
+      // document.getElementById('metricEV').textContent = total;
+    }
+
+    function saveStates() {
+      const vals = getStateValues();
+      save('stateResults', JSON.stringify(vals));
+      const total = vals.reduce((a, b) => a + b, 0);
+      // Also update the national EV field to match if desired
+      document.getElementById('pollEV').value = total;
+      save('pollEV', total);
+      updateMetrics();
+      showToast('State results saved • Total EVs: ' + total);
+    }
+
+    function zeroAllStates() {
+      setStateValues(STATES.map(() => 0));
+      showToast('All states set to 0');
+    }
+
+    // ========== LOAD ==========
+    function loadAllData() {
+      document.getElementById('candPresident').value = load('candPresident', 'Thomas');
+      document.getElementById('candVP').value = load('candVP', 'Matthew');
+      document.getElementById('candChair').value = load('candChair', 'Rhett');
+      document.getElementById('candSlogan').value = load('candSlogan', 'Round. Filled with freedom. Always rising.');
+
+      document.getElementById('pollDonut').value = load('pollDonut', '0');
+      document.getElementById('pollRice').value = load('pollRice', '0');
+      document.getElementById('pollOther').value = load('pollOther', '0');
+      document.getElementById('pollEV').value = load('pollEV', '0');
+
+      document.getElementById('staffNotes').value = load('staffNotes', '');
+      document.getElementById('dailyMessage').value = load('dailyMessage', '');
+
+      document.getElementById('volCount').value = load('volCount', '0');
+      document.getElementById('volToday').value = load('volToday', '0');
+
+      document.getElementById('electionDate').value = load('electionDate', '2026-11-03');
+
+      // States
+      try {
+        const saved = JSON.parse(load('stateResults', '[]'));
+        if (saved.length === STATES.length) {
+          setStateValues(saved);
+        } else {
+          setStateValues(STATES.map(() => 0));
+        }
+      } catch {
+        setStateValues(STATES.map(() => 0));
+      }
+
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      document.getElementById('metricVote').textContent = load('pollDonut', '0') + '%';
+      document.getElementById('metricEV').textContent = load('pollEV', '0');
+      document.getElementById('metricVols').textContent = Number(load('volCount', '0')).toLocaleString();
+    }
+
+    function updateCountdown() {
+      const dateStr = load('electionDate', '2026-11-03');
+      document.getElementById('electionDate').value = dateStr;
+      const election = new Date(dateStr + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const diff = Math.ceil((election - today) / (1000 * 60 * 60 * 24));
+      document.getElementById('metricDays').textContent = diff;
+      document.getElementById('metricDateLabel').textContent = diff >= 0
+        ? 'Election: ' + dateStr
+        : 'Election date has passed';
+    }
+
+    // ========== SAVE ==========
+    function saveCandidates() {
+      save('candPresident', document.getElementById('candPresident').value);
+      save('candVP', document.getElementById('candVP').value);
+      save('candChair', document.getElementById('candChair').value);
+      save('candSlogan', document.getElementById('candSlogan').value);
+      showToast('Candidate info saved');
+    }
+
+    function savePolling() {
+      save('pollDonut', document.getElementById('pollDonut').value);
+      save('pollRice', document.getElementById('pollRice').value);
+      save('pollOther', document.getElementById('pollOther').value);
+      save('pollEV', document.getElementById('pollEV').value);
+      updateMetrics();
+      showToast('National numbers updated');
+    }
+
+    function saveCountdown() {
+      const d = document.getElementById('electionDate').value;
+      save('electionDate', d);
+      updateCountdown();
+      showToast('Countdown updated');
+    }
+
+    function saveNotes() {
+      save('staffNotes', document.getElementById('staffNotes').value);
+      showToast('Notes saved');
+    }
+
+    function saveMessage() {
+      save('dailyMessage', document.getElementById('dailyMessage').value);
+      showToast('Message saved');
+    }
+
+    function saveVolunteers() {
+      save('volCount', document.getElementById('volCount').value);
+      save('volToday', document.getElementById('volToday').value);
+      updateMetrics();
+      showToast('Volunteer numbers updated');
+    }
+
+    function resetAll() {
+      if (confirm('Reset all staff data to blank starting values? This cannot be undone.')) {
+        const keys = [
+          'candPresident','candVP','candChair','candSlogan',
+          'pollDonut','pollRice','pollOther','pollEV',
+          'staffNotes','dailyMessage','volCount','volToday',
+          'electionDate','stateResults','applications'
+        ];
+        keys.forEach(k => localStorage.removeItem('donut_' + k));
+        loadAllData();
+        updateCountdown();
+        renderApplications('pending');
+        showToast('All data reset');
+      }
+    }
+
+    // ========== APPLICATIONS ==========
+    let currentAppFilter = 'pending';
+
+    function getApplications() {
+      try {
+        return JSON.parse(localStorage.getItem('donut_applications') || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveApplications(apps) {
+      localStorage.setItem('donut_applications', JSON.stringify(apps));
+    }
+
+    function filterApps(status, btn) {
+      currentAppFilter = status;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderApplications(status);
+    }
+
+    function renderApplications(filter) {
+      const apps = getApplications();
+      const list = document.getElementById('applicationsList');
+      const badge = document.getElementById('appCountBadge');
+
+      const pendingCount = apps.filter(a => a.status === 'pending').length;
+      badge.textContent = pendingCount > 0 ? `(${pendingCount} pending)` : '';
+
+      const filtered = filter === 'all' ? apps : apps.filter(a => a.status === filter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="app-empty">No ${filter === 'all' ? '' : filter + ' '}applications.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(app => `
+        <div class="app-card ${app.status}">
+          <div class="app-header">
+            <div class="app-name">${escapeHtml(app.name)}</div>
+            <span class="app-status ${app.status}">${app.status}</span>
+          </div>
+          <div class="app-meta">
+            <strong>Email:</strong> ${escapeHtml(app.email)} &nbsp;|&nbsp;
+            <strong>Phone:</strong> ${escapeHtml(app.phone)}<br>
+            <strong>State:</strong> ${escapeHtml(app.state)} &nbsp;|&nbsp;
+            <strong>Role:</strong> ${escapeHtml(app.role)}<br>
+            <strong>Submitted:</strong> ${escapeHtml(app.submittedAt)}<br>
+            <strong>Experience:</strong> ${escapeHtml(app.experience)}<br>
+            <strong>Why join:</strong> ${escapeHtml(app.why)}
+          </div>
+          ${app.status === 'pending' ? `
+            <div class="app-actions">
+              <button class="btn btn-primary" onclick="setAppStatus('${app.id}', 'approved')">Approve</button>
+              <button class="btn btn-danger" onclick="setAppStatus('${app.id}', 'rejected')">Reject</button>
+            </div>
+          ` : `
+            <div class="app-actions">
+              <button class="btn btn-secondary" onclick="setAppStatus('${app.id}', 'pending')">Move to Pending</button>
+            </div>
+          `}
+        </div>
+      `).join('');
+    }
+
+    function setAppStatus(id, status) {
+      const apps = getApplications();
+      const app = apps.find(a => a.id === id);
+      if (app) {
+        app.status = status;
+        saveApplications(apps);
+        renderApplications(currentAppFilter);
+        showToast(status === 'approved' ? 'Application approved' : status === 'rejected' ? 'Application rejected' : 'Moved to pending');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

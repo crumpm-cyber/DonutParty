@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply for Staff | The Donut Party</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .apply-box {
+      max-width: 560px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 18px;
+      padding: 2.3rem 2rem;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border: 4px solid var(--glaze);
+    }
+    .apply-box label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+      color: #333;
+    }
+    .apply-box input,
+    .apply-box select,
+    .apply-box textarea {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 1.1rem;
+      font-family: inherit;
+    }
+    .apply-box textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .apply-box input:focus,
+    .apply-box select:focus,
+    .apply-box textarea:focus {
+      outline: none;
+      border-color: var(--chocolate);
+    }
+    .success-msg {
+      display: none;
+      background: #e8f5e9;
+      border: 2px solid #4caf50;
+      color: #2e7d32;
+      padding: 1.2rem;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo"><span>🍩</span> The Donut Party</a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="leadership.html">Leadership</a>
+        <a href="platform.html">Platform</a>
+        <a href="vs.html">Donuts vs Rice</a>
+        <a href="join.html">Join</a>
+        <a href="apply.html" class="active">Apply</a>
+        <a href="staff.html">Staff</a>
+      </nav>
+    </div>
+  </header>
+
+  <section>
+    <h2>Apply to Join Party Staff</h2>
+    <p class="section-intro">
+      Want to work with Chairman Rhett, Candidate Thomas, and Running Mate Matthew?  
+      Submit an application below. Staff will review and approve applications.
+    </p>
+
+    <div class="apply-box">
+      <div class="success-msg" id="successMsg">
+        ✓ Application submitted! Staff will review it soon.
+      </div>
+
+      <form id="applyForm" onsubmit="submitApplication(event)">
+        <label for="fullName">Full Name *</label>
+        <input type="text" id="fullName" required placeholder="Your full name">
+
+        <label for="email">Email *</label>
+        <input type="email" id="email" required placeholder="you@example.com">
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" placeholder="(optional)">
+
+        <label for="state">State *</label>
+        <select id="state" required>
+          <option value="">Select your state</option>
+          <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option>
+          <option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option>
+          <option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+          <option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option>
+          <option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+          <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+          <option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option>
+          <option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option>
+          <option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+          <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+          <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option>
+          <option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option>
+          <option>Wisconsin</option><option>Wyoming</option><option>District of Columbia</option>
+        </select>
+
+        <label for="role">Preferred Role *</label>
+        <select id="role" required>
+          <option value="">Select a role</option>
+          <option>Volunteer Coordinator</option>
+          <option>Field Organizer</option>
+          <option>Communications / Social Media</option>
+          <option>Data & Analytics</option>
+          <option>Events & Outreach</option>
+          <option>Fundraising</option>
+          <option>Policy Research</option>
+          <option>General Staff Support</option>
+        </select>
+
+        <label for="experience">Relevant Experience</label>
+        <textarea id="experience" placeholder="Briefly describe any campaign, organizing, or related experience..."></textarea>
+
+        <label for="why">Why do you want to join Donut Party staff? *</label>
+        <textarea id="why" required placeholder="Tell us why you want to be part of the team..."></textarea>
+
+        <button type="submit" class="cta-btn" style="width:100%; margin-top:0.5rem;">
+          Submit Application
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 The Donut Party — All Rights Reserved (and lightly glazed)</p>
+    <p class="disclaimer">
+      This is a completely satirical, fictional website created for fun.  
+      It is not affiliated with any real political party, campaign, or organization.
+    </p>
+  </footer>
+
+  <script>
+    function submitApplication(e) {
+      e.preventDefault();
+
+      const app = {
+        id: Date.now().toString(),
+        name: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim() || '—',
+        state: document.getElementById('state').value,
+        role: document.getElementById('role').value,
+        experience: document.getElementById('experience').value.trim() || '—',
+        why: document.getElementById('why').value.trim(),
+        status: 'pending',
+        submittedAt: new Date().toLocaleString()
+      };
+
+      // Load existing applications
+      let apps = [];
+      try {
+        apps = JSON.parse(localStorage.getItem('donut_applications') || '[]');
+      } catch { apps = []; }
+
+      apps.unshift(app); // newest first
+      localStorage.setItem('donut_applications', JSON.stringify(apps));
+
+      // Show success and reset form
+      document.getElementById('successMsg').style.display = 'block';
+      document.getElementById('applyForm').reset();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
